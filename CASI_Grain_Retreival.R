@@ -1,7 +1,9 @@
-
-
-
-
+#
+# Grain Size Estimation 
+# Nolin and Dozier method developed for CASI
+#
+# Matt Olson - University of Utah 04/2018
+# # # # # # # # # # # #
 
 require(hsdar)
 require(rgdal)
@@ -14,7 +16,7 @@ setwd("~/data/ASO")
 tbl_snicar = read.csv("tables/LookupTable2.csv")
 tbl_snicar[,1] = tbl_snicar[,1]*1000
 
-### READ IN ASO DATA
+### READ IN CASI DATA
 r = brick("CASI/class_image/CASI_2017_02_21_ort2_mosaic_specalb")
 # obtain a list of wavelengths
 aso_wv = as.numeric(unlist(lapply(strsplit(names(r),"\\.{3}"),
@@ -43,12 +45,14 @@ abline(v=1030,col='red',lty=2)
 
 #### Integrated Depth
 # change dimentions first >> 
-ss <- snicar_resample[,c(62:72)]
+ss <- snicar_resample[,c(62:72)] #tail(aso_df[,1],11) ???
 # Continuum
+
+# Compute endpoints for each grain size
 shortb = snicar_resample[c(1:1471),62]@spectra@spectra_ma
 longb = snicar_resample[c(1:1471),72]@spectra@spectra_ma
 
-#Plot start and end of feature for each grain size
+# Plot start and end of feature for each grain size
 plot(snicar_resample[c(1:1471),62]@spectra@spectra_ma,ylim=c(0.3,1),type='l')
 lines(seq(1,1471),snicar_resample[c(1:1471),72]@spectra@spectra_ma,col='green')
 
@@ -60,10 +64,18 @@ cont = array(dim=c(11,length(shortb)))
 for(i in 1:11){
   cont[i,] = (i-1)*slope + shortb
 }
+#test
 plot(snicar_resample[1000,c(62:72)],type='l')
 lines(snicar_resample@wavelength[62:72],cont[,1000],col='red',lty=2)
 
+# Create integrand
+integrand = array(dim=c(11,length(shortb)))
+for (i in 1:11){
+  integrand[i,] <- (cont[i,] - snicar_resample[c(1:1471),i+61]@spectra@spectra_ma )/cont[i,]
+} 
 
+
+# END RESULT == LOOKUP table
 
 
 
