@@ -164,5 +164,34 @@ filename = "CASI_2017_02_20_174008_snow_grain.grd"
 r2 <- writeRaster(r2, filename, overwrite=TRUE)
 hdr(r2, format="ENVI")
 
+# read in mask (snow == 1)
+mask1 = brick("CASI/20170220/174008/CASI_2017_02_20_174008_classified_ort")
+gz_mask <- raster::mask(gz, mask1, filename="", inverse=FALSE,
+     maskvalue=c(0,2,3,4))
 
+# plot RGB and grain size
+par(mfrow=c(1,2))
+par(oma=c(0,0,0,0))
+plotRGB(r, r=23, g=19, b=8, stretch="lin")
+plot(gz_mask,col=blues9,add=T)
+plotRGB(r, r=23, g=19, b=8, stretch="lin")
+
+# plot RGB and grain size
+par(mfrow=c(1,2))
+par(oma=c(0,0,0,0))
+plotRGB(r, r=23, g=19, b=8, stretch="lin")
+plot(gz_mask,col=rev(rainbow(8,alpha=0.5)),add=T)
+plotRGB(r, r=23, g=19, b=8, stretch="lin")
+
+# Overlay
+par(mfrow=c(1,1))
+plotRGB(r, r=23, g=19, b=8, stretch="lin")
+plot(gz_mask,col=rev(rainbow(8,alpha=0.5)),add=T)
+
+# hist
+par(mfrow=c(1,1))
+par(mar=c(4.5,4.5,2,0))
+hist(gz_mask[[1]], col='deepskyblue2',
+     main= "CASI_2017_02_20_174008",
+     xlab="Grain size (micro m)")
 
