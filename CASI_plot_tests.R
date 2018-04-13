@@ -177,7 +177,7 @@ lookup_values <- function(casi_integral,casi_slope,snicar_spectral,b_range){
 ##### # # # # # # # # # # # # #
 # PLOT CASI SPECTRA VS MODELED
 
-casi_test <- function(band_range){
+casi_test <- function(test_casi_full,band_range,pixel){
   par(mfrow=c(3,2))
   par(oma=c(3.5,3.5,1,3))
   par(mar=c(0.5,0.5,0,0))
@@ -185,14 +185,14 @@ casi_test <- function(band_range){
   rng = band_range
   
   # plot CASI
-  pix = 10            # POSSIBLE VARIABLE -> ITERATE THROUGH
+  pix = pixel            # POSSIBLE VARIABLE -> ITERATE THROUGH
   y_lim <- range(test_casi_full[pix,]@spectra@spectra_ma)+ 
     (rep(diff(range(test_casi_full[pix,]@spectra@spectra_ma))/30,2)*c(-1,1))
   y_lim[1] = 60 # FIX!
   y_lim2 <- range(test_casi_full[pix,rng]@spectra@spectra_ma) + 
     (rep(diff(range(test_casi_full[pix,rng]@spectra@spectra_ma))/10,2)*c(-1,1))
   plot(test_casi_full[pix,],ylim=y_lim,xaxt='n') # plot some pixel
-  legend('bottom',c("       CASI",paste(as.character(aso_wv[c(rng[1],tail(rng,1))]),collapse='-')),cex=1.2,bty='n')
+  legend('bottom',c("       CASI",paste(as.character(aso_wv[c(rng[1],tail(rng,1))]),collapse='--')),cex=1.2,bty='n')
   polygon(c(aso_wv[rng[1]],aso_wv[tail(rng,1)]+10,aso_wv[tail(rng,1)]+10,aso_wv[rng[1]]),
           c(y_lim2[2],y_lim2[2],y_lim2[1],y_lim2[1]),col= rgb(255, 0, 0, 5, maxColorValue=255),border='firebrick')
   plot(test_casi_full[pix,rng],xaxt='n',yaxt='n')
@@ -225,7 +225,7 @@ casi_test <- function(band_range){
   y_lim2 <- range(snicar_resample[gs,rng]@spectra@spectra_ma) + 
     (rep(diff(range(snicar_resample[gs,rng]@spectra@spectra_ma))/20,2)*c(-1,1))
   plot(snicar_resample[gs,],type='l',ylim=y_lim,xaxt='n')
-  legend('bottomleft',c("SNICAR",paste("grain size =",gs+29)),cex=1.2,bty='n')
+  legend('bottomleft',c("SNICAR","Integration method",paste("grain size =",gs+29)),cex=1.2,bty='n')
   #legend('bottomleft',paste("grain size =",gs+29),bty='n')
   polygon(c(aso_wv[rng[1]],aso_wv[tail(rng,1)]+10,aso_wv[tail(rng,1)]+10,aso_wv[rng[1]]),
           c(y_lim2[2],y_lim2[2],y_lim2[1],y_lim2[1]),col= rgb(255, 0, 0, 5, maxColorValue=255),border='firebrick')
@@ -255,7 +255,7 @@ casi_test <- function(band_range){
   y_lim2 <- range(snicar_resample[gs,rng]@spectra@spectra_ma) + 
     (rep(diff(range(snicar_resample[gs,rng]@spectra@spectra_ma))/20,2)*c(-1,1))
   plot(snicar_resample[gs,],type='l',ylim=y_lim)
-  legend('bottomleft',c("SNICAR",paste("grain size =",gs+29)),cex=1.2,bty='n')
+  legend('bottomleft',c("SNICAR","Slope method", paste("grain size =",gs+29)),cex=1.2,bty='n')
   #legend('bottomleft',paste("grain size =",gs+29),bty='n')
   polygon(c(aso_wv[rng[1]],aso_wv[tail(rng,1)]+10,aso_wv[tail(rng,1)]+10,aso_wv[rng[1]]),
           c(y_lim2[2],y_lim2[2],y_lim[1],y_lim[1]),col= rgb(255, 0, 0, 5, maxColorValue=255),border='firebrick')
@@ -288,9 +288,28 @@ casi_test <- function(band_range){
 # ...
 # RUN FROM HERE
 
+# ROI
+roi_l <- crop(r, extent(c(xmin=260100, xmax=260800, ymin=4198600, ymax=4199600)))
+roi_s <- crop(r, extent(c(xmin=260300, xmax=260370, ymin=4198890, ymax=4198950)))
+test_casi_full = speclib(spectra=roi_s[],wavelength=aso_wv, fwhm=rep(3.5,length(aso_wv)))
+
+# rectangular bounding box
+e = extent(rn2)
+p <- as(e, 'SpatialPolygons')
+plotRGB(rn_l, r=23, g=19, b=8, stretch="lin")
+plot(p, lwd=2,border='red',add=T)
+# RESET AFTER RGB IMAGE
+par(mar=par()$mar)
+
+# # # #  # #
+## # # ## # #
 # call function
-range_of_interest = c(62:68)
-casi_test(band_range = range_of_interest)
+range_of_interest = c(59:68)
+paste(range(aso_wv[range_of_interest]),collapse="--")
+casi_test(test_casi_full, band_range = range_of_interest, pixel = 10)
+
+
+aso_wv
 
 # could add pixel variable
 ##############################################################################
